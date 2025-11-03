@@ -48,6 +48,7 @@ struct sockaddr_in csa()
 
 int main()
 {
+	int ackarr[NUM_PACKETS+1]={0};
 	int s = socket(AF_INET,SOCK_DGRAM,0);
 	error_check(s,"Socket Created...");
 
@@ -80,14 +81,27 @@ int main()
 		ACK ack;
 		status = recvfrom(s,&ack,sizeof(ack),0,(struct sockaddr *)&server_address,&server_len);
 		if (status > 0){
-			base++;
 			printf("[ACK] recieved ack for frame %d\n",base);
-			
+			ackarr[ack.ack_num] = 1;
+			while (ackarr[base] && base <= NUM_PACKETS){
+				base++;
+			}
 		}
-		else{
-			printf("Timeout error ....\n");
-			retries++;
-			next = base;
+		else
+		{
+			printf(".............Timeout error ....\n");
+			for (int i = base ; i < next ; i++){
+				if (ackarr[i]==0){
+					packet.seq_num = i;
+					packet.data = i;
+					status = sendto(s,&packet,sizeof(packet),0,(struct sockaddr *)&server_address,server_len);
+					printf("Frame Sent ...%d\n",packet.seq_num);
+				}
+
+			}
 		}
 	}
+	close(s);
+	return 0;
 }
+

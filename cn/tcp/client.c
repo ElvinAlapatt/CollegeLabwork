@@ -49,6 +49,29 @@ int main(){
 	
 	status = recv(s,buffer,BUFFER_SIZE,0);
 	error_check(status,buffer);
+
+	FILE *f1 = fopen("client.txt","w");
+	
+	if(f1 == NULL)
+	{
+		printf("File pointer error..");
+	}
+	else{
+		fprintf(f1,"%s\n",buffer);
+	fclose(f1);
+	}
+	FILE *f = fopen("client.txt","r");
+	if(f == NULL)
+	{
+		printf("File pointer error..");
+	}
+	else{
+		char read_buffer[4096];
+		size_t read_bytes = fread(read_buffer,1,4095,f);
+		printf("Client file contains.....\n%s",read_buffer);
+		fclose(f);
+	}
+	
 	
 	close(s);
 	return 0;
